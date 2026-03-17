@@ -1,0 +1,122 @@
+stages:
+  - security
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  NODE_IMAGE: 'node:22' # อัปเป็น 22 ให้ตรงกับ Lambda target
+  AWS_DEFAULT_REGION: 'ap-southeast-1'
+
+# ── Cache node_modules ข้าม stages ────────────────────────────
+.node_cache: &node_cache
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull-push
+
+# ── Security ───────────────────────────────────────────────────
+audit:
+  stage: security
+  image: $NODE_IMAGE
+  <<: *node_cache
+  script:
+    - npm ci
+    - npm audit --audit-level=high
+  only:
+    - main
+    - merge_requests
+
+# ── Lint ───────────────────────────────────────────────────────
+lint:
+  stage: lint
+  image: $NODE_IMAGE
+  <<: *node_cache
+  script:
+    - npm ci
+    - npm run typecheck
+    - npm run lint
+    - npm run format
+  only:
+    - main
+    - merge_requests
+
+# ── Unit Tests ─────────────────────────────────────────────────
+test:unit:
+  stage: test
+  image: $NODE_IMAGE
+  <<: *node_cache
+  script:
+    - npm ci
+    - npm run test:cov
+  coverage: '/All files\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+[\d.]+\s+\|\s+([\d.]+)/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 7 days
+  only:
+    - main
+    - merge_requests
+
+# ── Integration Tests ──────────────────────────────────────────
+test:integration:
+  stage: test
+  image: $NODE_IMAGE
+  <<: *node_cache
+  script:
+    - npm ci
+    - npm run test:int
+  only:
+    - main
+  allow_failure: true # ← integration อาจต้องการ external service
+
+# ── Build ──────────────────────────────────────────────────────
+build:
+  stage: build
+  image: $NODE_IMAGE
+  <<: *node_cache
+  script:
+    - npm ci
+    - npm run build
+    - ls -lh dist/
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 day
+  only:
+    - main
+
+# ── Deploy ─────────────────────────────────────────────────────
+deploy:
+  stage: deploy
+  image: $NODE_IMAGE
+  needs:
+    - build # ← ใช้ artifact จาก build stage ไม่ต้อง build ซ้ำ
+    - test:unit
+    - lint
+  script:
+    - apt-get update -y && apt-get install -y zip curl unzip
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    - unzip -q awscliv2.zip
+    - ./aws/install
+    - zip -r function.zip dist/
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set default.region $AWS_DEFAULT_REGION
+    - aws lambda update-function-code
+      --function-name $LAMBDA_FUNCTION_NAME
+      --zip-file fileb://function.zip
+    - aws lambda wait function-updated
+      --function-name $LAMBDA_FUNCTION_NAME
+  environment:
+    name: production
+  only:
+    - main

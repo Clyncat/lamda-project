@@ -1,0 +1,76 @@
+{
+  "name": "lamda-project",
+  "version": "1.0.0",
+  "description": "mPAY QR Code Generator Lambda - Hexagonal Architecture",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.ts",
+    "build:analyze": "node esbuild.config.ts && echo 'Open dist/meta.json at https://esbuild.github.io/analyze/'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:int": "vitest run --config vitest.integration.config.ts",
+    "test:cov": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check \"src/**/*.ts\"",
+    "format:fix": "prettier --write \"src/**/*.ts\"",
+    "check": "npm run typecheck && npm run lint && npm run format",
+    "check:fix": "npm run lint:fix && npm run format:fix",
+    "security": "npm audit --audit-level=high",
+    "changelog": "conventional-changelog -p conventional -i CHANGELOG.md -s",
+    "changelog:all": "conventional-changelog -p conventional -i CHANGELOG.md -s -r 0",
+    "docs:validate": "redocly lint docs/openapi.yaml",
+    "docs:preview": "redocly build-docs docs/openapi.yaml --output docs/index.html && start docs/index.html",
+    "commit": "cz",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "tests/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@eslint/js": "^9.39.4",
+    "@redocly/cli": "^2.22.1",
+    "@types/aws-lambda": "^8.10.161",
+    "@types/node": "^25.5.0",
+    "@types/pino": "^7.0.4",
+    "@vitest/coverage-v8": "^4.1.0",
+    "commitizen": "^4.2.4",
+    "conventional-changelog-cli": "^5.0.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "esbuild": "^0.27.4",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-security": "^4.0.0",
+    "eslint-plugin-sonarjs": "^4.0.2",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "msw": "^2.12.12",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1",
+    "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "pino": "^10.3.1",
+    "zod": "^4.3.6"
+  }
+}

@@ -1,0 +1,104 @@
+openapi: 3.1.0
+info:
+  title: mPAY QR Code Generator
+  version: 1.0.0
+  description: Lambda API for generating mPAY PromptPay QR codes
+
+paths:
+  /qr:
+    post:
+      summary: Generate QR Code
+      operationId: generateQr
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateQrRequest'
+            example:
+              orderId: ORD-001
+              productName: Coffee
+              amount: 50
+      responses:
+        '200':
+          description: QR generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateQrResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: mPAY gateway error
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    GenerateQrRequest:
+      type: object
+      required: [orderId, productName, amount]
+      properties:
+        orderId:
+          type: string
+          maxLength: 50
+          pattern: '^[\w-]+$'
+          example: ORD-001
+        productName:
+          type: string
+          minLength: 1
+          example: Coffee
+        amount:
+          type: number
+          minimum: 0.01
+          example: 50.00
+        expireSeconds:
+          type: integer
+          default: 3600
+          example: 3600
+        terminalId:
+          type: string
+          example: TERM-001
+        locationName:
+          type: string
+          example: Food Court A
+        ref1:
+          type: string
+          example: TABLE-5
+
+    GenerateQrResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            txnId:
+              type: string
+              example: TXN-001
+            qrCode:
+              type: string
+              example: 00020101021...
+            qrCodeUrl:
+              type: string
+              example: https://api.mpay.example.com/qr/TXN-001.png
+            expiredAt:
+              type: string
+              format: date-time
+              example: 2026-03-17T10:00:00Z
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: order_id is required
