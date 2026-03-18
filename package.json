@@ -4,8 +4,8 @@
   "description": "mPAY QR Code Generator Lambda - Hexagonal Architecture",
   "type": "module",
   "scripts": {
-    "build": "node esbuild.config.ts",
-    "build:analyze": "node esbuild.config.ts && echo 'Open dist/meta.json at https://esbuild.github.io/analyze/'",
+    "build": "node --experimental-strip-types esbuild.config.ts",
+    "build:analyze": "node --experimental-strip-types esbuild.config.ts && echo 'Open dist/meta.json at https://esbuild.github.io/analyze/'",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:int": "vitest run --config vitest.integration.config.ts",
@@ -21,7 +21,7 @@
     "changelog": "conventional-changelog -p conventional -i CHANGELOG.md -s",
     "changelog:all": "conventional-changelog -p conventional -i CHANGELOG.md -s -r 0",
     "docs:validate": "redocly lint docs/openapi.yaml",
-    "docs:preview": "redocly build-docs docs/openapi.yaml --output docs/index.html && start docs/index.html",
+    "docs:preview": "redocly build-docs docs/openapi.yaml --output docs/index.html && open docs/index.html",
     "commit": "cz",
     "prepare": "husky"
   },

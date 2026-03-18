@@ -8,7 +8,7 @@ export class OrderId {
       throw new ValidationError('order_id must be a non-empty string');
     }
 
-    const trimmed = raw.trim(); // ← trim ก่อน
+    const trimmed = raw.trim();
 
     if (trimmed.length > 50) {
       throw new ValidationError('order_id must not exceed 50 characters');

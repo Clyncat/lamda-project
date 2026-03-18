@@ -59,6 +59,98 @@ export default [
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
 
+      // ── Naming Convention ──────────────────────────────────
+      '@typescript-eslint/naming-convention': [
+        'error',
+
+        // HTTP headers / external API keys ที่ต้องใช้ quotes
+        // bypass naming check อัตโนมัติ
+        // เช่น 'Content-Type', 'X-sdpg-nonce', 'x-api-key'
+        {
+          selector: 'objectLiteralProperty',
+          modifiers: ['requiresQuotes'],
+          format: null,
+        },
+
+        // ค่าคงที่ global → UPPER_SNAKE_CASE
+        // PascalCase สำหรับ zod schema เช่น EnvSchema, BodySchema
+        {
+          selector: 'variable',
+          modifiers: ['const', 'global'],
+          format: ['UPPER_CASE', 'camelCase', 'PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+
+        // ตัวแปรทั่วไป → camelCase
+        {
+          selector: 'variable',
+          format: ['camelCase', 'PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+
+        // Function → camelCase (กิริยา เช่น generateQr, parseEvent)
+        {
+          selector: 'function',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+        },
+
+        // Method → camelCase (กิริยา เช่น execute, generateQr)
+        {
+          selector: 'method',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+        },
+
+        // Parameter → camelCase
+        {
+          selector: 'parameter',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+        },
+
+        // Class → PascalCase (คำนาม เช่น MpayHttpGateway, Amount)
+        {
+          selector: 'class',
+          format: ['PascalCase'],
+        },
+
+        // Interface → PascalCase
+        // Port interfaces ใส่ I prefix โดย convention (IMpayGateway)
+        // DTO interfaces ไม่ต้อง (GenerateQrRequest, MpayConfig)
+        {
+          selector: 'interface',
+          format: ['PascalCase'],
+        },
+
+        // Type alias → PascalCase (เช่น TxnStatus, MpayConfig)
+        {
+          selector: 'typeAlias',
+          format: ['PascalCase'],
+        },
+
+        // Enum → PascalCase (เช่น TxnStatus)
+        {
+          selector: 'enum',
+          format: ['PascalCase'],
+        },
+
+        // Enum member → UPPER_CASE (เช่น PENDING, SUCCESS, EXPIRED)
+        {
+          selector: 'enumMember',
+          format: ['UPPER_CASE'],
+        },
+
+        // Property → camelCase, UPPER_CASE, snake_case, PascalCase
+        // snake_case สำหรับ mPAY API response (txn_id, qr_code)
+        // PascalCase สำหรับ zod schema fields
+        {
+          selector: 'property',
+          format: ['camelCase', 'UPPER_CASE', 'snake_case', 'PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+      ],
+
       // ── Imports ────────────────────────────────────────────
       'import/no-duplicates': 'error',
       'import/order': [
@@ -105,6 +197,39 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',
       'sonarjs/no-duplicate-string': 'off',
+      '@typescript-eslint/naming-convention': [
+        'warn',
+        {
+          selector: 'objectLiteralProperty',
+          modifiers: ['requiresQuotes'],
+          format: null,
+        },
+        {
+          selector: 'variable',
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+        {
+          selector: 'function',
+          format: ['camelCase', 'PascalCase'],
+        },
+        {
+          selector: 'class',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'interface',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'typeAlias',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'property',
+          format: null,
+        },
+      ],
     },
   },
-];
+];;;
